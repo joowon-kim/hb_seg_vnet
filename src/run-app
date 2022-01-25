@@ -1,0 +1,11 @@
+#!/bin/sh
+
+fn="/code/predict.py"
+
+if [ -e ${fn} ]; then
+    python $fn
+else
+    echo "$fn not exist"
+    exit 1
+fi
+

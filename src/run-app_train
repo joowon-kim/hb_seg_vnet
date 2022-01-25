@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ $# > 0 ]; then
+    cd $1
+fi
+
+fn="/code/train.py"
+
+if [ -e ${fn} ]; then
+    python $fn
+else
+    echo "$fn not exist"
+    exit 1
+fi
+

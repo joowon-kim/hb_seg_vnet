@@ -1,0 +1,21 @@
+{
+    "train": {
+        "batch_size": 5,
+        "img_size": [64, 64, 64],
+        "fn_model": "saved_model/hb_seg_model.json",
+        "fn_weight": "saved_model/hb_seg_weight",
+        "fn_check": "saved_model/weights.{epoch:02d}-{val_loss:.4f}",
+        "dn_testdata": "../data/test",
+        "fn_testcsv": "hb_seg_test.csv",
+        "logdir": "saved_model/log"
+    },
+    "predict": {
+        "batch_size": 10,
+        "fn_weight": "saved_model/hg_seg_weight",
+        "dn_data": "../data/predict",
+        "fn_t1w": "T1w_brain.nii",
+        "fn_seg": "hb_seg_{lr}.nii.gz",
+        "fn_seg_pred": "hb_predict.nii.gz",
+        "fn_csv": "hb_seg_predict.csv"
+    }
+}
