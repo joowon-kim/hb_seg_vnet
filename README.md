@@ -1,5 +1,4 @@
-# hb_seg_vnet
-Habenula Segmentation using VNet
+# Automated Human Habenula Segmentation from T1-weighted Magnetic Resonance Images using V-Net [Kim and Xu. 2022](#Kim2022)
 
 ---
 
@@ -86,8 +85,9 @@ choose one among
 ## Note that trained models are not in the github repository.
 
 ## Reference
-<a name=Kim2016>[1] Kim et al, Human habenula segmentation using myelin content. Neuroimage, 2016, 130 : 145-156 http://www.ncbi.nlm.nih.gov/pubmed/26826517
+<an name=Kim2022>[1] Kim and Xu, Automated Human Habenula Segmentation from T1-weighted Magnetic Resonance Images using V-Net. bioRxiv, 2022.01.25.477768 https://www.biorxiv.org/content/10.1101/2022.01.25.477768v1
 
-<a name=Kim2018>[2] Kim et al, Reproducibility of myelin content‐based human habenula segmentation at 3 Tesla. Human Brain Mapping, 2018, 39 : 3058-3071 https://doi.org/10.1002/hbm.24060
+<a name=Kim2016>[2] Kim et al, Human habenula segmentation using myelin content. Neuroimage, 2016, 130 : 145-156 http://www.ncbi.nlm.nih.gov/pubmed/26826517
 
-<an name=Kim2022>[3] Kim and Xu, Automated Human Habenula Segmentation from T1-weighted Magnetic Resonance Images using V-Net.
+<a name=Kim2018>[3] Kim et al, Reproducibility of myelin content‐based human habenula segmentation at 3 Tesla. Human Brain Mapping, 2018, 39 : 3058-3071 https://doi.org/10.1002/hbm.24060
+
