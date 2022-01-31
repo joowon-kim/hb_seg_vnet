@@ -1,4 +1,4 @@
-# Automated Human Habenula Segmentation from T1-weighted Magnetic Resonance Images using V-Net [Kim and Xu. 2022](#Kim2022)
+# Automated Human Habenula Segmentation from T1-weighted Magnetic Resonance Images using V-Net ([Kim and Xu. 2022](#Kim2022))
 
 ---
 
