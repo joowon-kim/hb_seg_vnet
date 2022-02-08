@@ -83,6 +83,44 @@ choose one among
     python /path/to/code/predict.py
     ```
 
+## Example directory/file structure and config.json
+
+* Example directory/file structure
+    ```
+    + working/
+    |   + saved_model/
+    |   |   + hb_seg_model.json
+    |   |   + hb_seg_weight.data-00000-of-00002
+    |   |   + hb_seg_weight.data-00001-of-00002
+    |   |   + hb_seg_weight.index
+    |   |
+    |   + config.json
+    |
+    + data/
+    |   + subj1/
+    |   |   + T1w_brain.nii
+    |   |
+    |   + subj2/
+    |       + T1w_brain.nii
+    |
+    + code/
+        + data.py
+        + model.py
+        + post_processing.py
+        + predict.py
+        + test.py
+        + train.py
+        + voxel_similarity.py
+    ```
+
+* The `data/config.json` should contain `predict:dn_data: "../data"` and `predict:fn_weight: "saved_model/hb_seg_weight"`
+
+* Call `predict.py` in working/ directory.
+
+    ```
+    python ../code/predict.py
+    ```
+
 ## Note that trained models are not in the github repository.
 
 ## Reference
