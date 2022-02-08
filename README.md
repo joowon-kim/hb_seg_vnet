@@ -41,7 +41,7 @@ either of ...
     pip install nibabel scikit-image numpy
     ```
 
-## Preprocessing: AC-PC alignment
+## Preprocessing: AC-PC alignment and resample to 0.7 mm isotropic resolution
 
 choose one among
 
@@ -60,6 +60,7 @@ choose one among
         -dof 6 \
         -interp spline \
         -omat T1w_to_MNI_rigid.mat \
+        -applyisoxfm 0.7 \
         -out T1w_to_MNI_rigid
     fsleyes ${FSLDIR}/data/standard/MNI152_T1_1mm T1w_to_MNI_rigid
     ```
