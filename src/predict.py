@@ -16,6 +16,9 @@ from tensorflow.keras.models import model_from_json
 import model
 
 
+center1=(128,147,105)
+center2=(130,147,105)
+
 def get_data(base_dn, config, fn_img="T1w_brain.nii"):
     # predict
     lst_dn = glob.glob(os.path.join(base_dn, "*"))
@@ -25,14 +28,31 @@ def get_data(base_dn, config, fn_img="T1w_brain.nii"):
 
     input_img_paths = [os.path.join(dn, fn_img) for dn in lst_dn]
 
-    lst_transformations = [
-            data.Crop_singel_image(img_size=config.img_size),
-            data.normalization_single   # crop should be earlier than normalization
-            ]
+    lst_lst_transformations = [
+        [
+            data.Crop_single_image(img_size=config.img_size, center=center1),
+            data.normalization_single,   # crop should be earlier than normalization
+        ],
+        [
+            data.Crop_single_image(img_size=config.img_size, center=center2),
+            data.normalization_single,   # crop should be earlier than normalization
+        ],
+        [
+            data.flip_x_sngl, # FIXME
+            data.Crop_single_image(img_size=config.img_size, center=center1),
+            data.normalization_single,   # crop should be earlier than normalization
+        ],
+        [
+            data.flip_x_sngl, # FIXME
+            data.Crop_single_image(img_size=config.img_size, center=center2),
+            data.normalization_single,   # crop should be earlier than normalization
+        ]
+    ]
 
-    predict_gen = data.LoadPredictData(config.batch_size, config.img_size, input_img_paths, lst_transformations)
 
-    return predict_gen, input_img_paths
+    predict_gen = data.LoadPredictData(config.batch_size, config.img_size, input_img_paths, lst_lst_transformations)
+
+    return predict_gen, input_img_paths, len(lst_lst_transformations)
 
 if __name__ == '__main__':
     keras.backend.clear_session()
@@ -51,14 +71,37 @@ if __name__ == '__main__':
     model = model_from_json(model_json)
     model.load_weights(config.fn_weight)
 
-    predict_gen, lst_img = get_data(base_dn=base_dn, config=config, fn_img=fn_img)
+    predict_gen, lst_img, len_each = get_data(base_dn=base_dn, config=config, fn_img=fn_img)
     predict_preds = model.predict(predict_gen)
+
+    lst_lst_transformations = [
+        [
+            data.Pad_single_image(center=center1),
+        ],
+        [
+            data.Pad_single_image(center=center2),
+        ],
+        [
+            data.Pad_single_image(center=center1),
+            data.flip_x_sngl,
+        ],
+        [
+            data.Pad_single_image(center=center2),
+            data.flip_x_sngl,
+        ]
+    ]
 
     output_text = "subject,volume_left,volume_right\n"
     for i in range(len(lst_img)):
         img = nib.load(lst_img[i])
-        #dat_prob = data.pad_single_image(predict_preds[i,:,:,:,1]) # if softmax
-        dat_prob = data.pad_single_image(predict_preds[i,:,:,:,0]) # if sigmoid
+
+        dat_prob = np.zeros(img.shape, dtype=np.float32)
+
+        for j, lst_transformations in enumerate(lst_lst_transformations):
+            dat_prob_tmp = predict_preds[i * len_each + j,:,:,:,0]
+            for transform in lst_transformations:
+                dat_prob_tmp = transform(dat_prob_tmp)
+            dat_prob += (dat_prob_tmp / len_each)
 
         img_prob = nib.Nifti1Image(dat_prob, img.affine, img.header)
         nib.save(img_prob, os.path.join(os.path.dirname(lst_img[i]), fn_prob_out))

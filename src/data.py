@@ -18,6 +18,10 @@ def normalization(dat_input, dat_target, hdr=None, aff=None):
     return dat, dat_target
 
 
+def flip_x_sngl(dat_input, hdr=None, aff=None):
+    """Flip x dimension (left-right)"""
+    return dat_input[::-1,...]
+
 def flip_x(dat_input, dat_target, hdr=None, aff=None):
     """Flip x dimension (left-right)"""
     return dat_input[::-1,...], dat_target[::-1,...]
@@ -50,7 +54,7 @@ def normalization_single(dat_input, dat_target=None, hdr=None, aff=None):
     return dat
 
 
-class Crop_singel_image(object):
+class Crop_single_image(object):
     """Crop single 3D image. Default numbers are for MNI 152 0.7 mm template"""
     def __init__(self, img_size=(64,64,64), center=(128,147,105)):
         self.img_size = img_size
@@ -76,6 +80,21 @@ def pad_single_image(dat_input, dat_target=None, hdr=None, aff=None, img_size=(2
             ] = dat_input
     return dat_out
 
+class Pad_single_image(object):
+    """Pad single 3D image. Default numbers are for MNI 152 0.7 mm template"""
+    def __init__(self, img_size=(260,311,260), center=(128,147,105)):
+        self.img_size = img_size
+        self.center = center
+
+    def __call__(self, dat_input, dat_target=None, hdr=None, aff=None):
+        dat_out = np.zeros(self.img_size, dtype=dat_input.dtype)
+        min_xyz = [self.center[i] - dat_input.shape[i]//2 for i in range(len(self.img_size))]
+        dat_out[
+                min_xyz[0]:min_xyz[0]+dat_input.shape[0],
+                min_xyz[1]:min_xyz[1]+dat_input.shape[1],
+                min_xyz[2]:min_xyz[2]+dat_input.shape[2],
+                ] = dat_input
+        return dat_out
 
 class Crop_pad(object):
     """Crop or pad image"""
@@ -192,35 +211,42 @@ class LoadData(keras.utils.Sequence):
 class LoadPredictData(keras.utils.Sequence):
     """Helper to iterate over the data."""
 
-    def __init__(self, batch_size, img_size, input_img_paths, lst_transformations=[]):
+    def __init__(self, batch_size, img_size, input_img_paths, lst_lst_transformations=[]):
         self.batch_size = batch_size
         self.img_size = img_size
         self.input_img_paths = input_img_paths
         #self.target_img_paths = target_img_paths
-        self.lst_transformations = lst_transformations
+        self.lst_lst_transformations = lst_lst_transformations
+        self.len_each = len(lst_lst_transformations)
 
     def __len__(self):
-        return int(np.ceil(len(self.input_img_paths) / self.batch_size))
+        #return int(np.ceil(len(self.input_img_paths) / self.batch_size))
+        return int(np.ceil(len(self.input_img_paths) * self.len_each / self.batch_size))
         #return len(self.input_img_paths) // self.batch_size
 
     def __getitem__(self, idx):
         """Returns tuple (input, target) correspond to batch #idx."""
-        i = idx * self.batch_size
-        batch_input_img_paths = self.input_img_paths[i : i + self.batch_size]
-        #batch_target_img_paths = self.target_img_paths[i : i + self.batch_size]
         x = np.zeros((self.batch_size,) + self.img_size + (1,), dtype="float32")
-        #y = np.zeros((self.batch_size,) + self.img_size + (1,), dtype="uint8")
         y = None
 
-        #for j, (path_input, path_target) in enumerate(zip(batch_input_img_paths, batch_target_img_paths)):
-        for j, path_input in enumerate(batch_input_img_paths):
+        i_init = idx * self.batch_size
+        i_file = int(i_init / self.len_each)
+        i_transform = i_init % self.len_each
+        i_end = min(i_init + self.batch_size, len(self.input_img_paths) * self.len_each)
+
+        for i in range(i_end-i_init):
+            path_input = self.input_img_paths[i_file]
+
             img_in = nib.load(path_input)
-            #img_tg = nib.load(path_target)
             dat_in = img_in.get_fdata().astype("float32")
-            #dat_tg = img_tg.get_fdata().astype("uint8")
-            for transformation in self.lst_transformations:
+            for transformation in self.lst_lst_transformations[i_transform]:
                 dat_in = transformation(dat_in, hdr=img_in.header, aff=img_in.affine)
-            x[j,:,:,:,0] = dat_in
-            #y[j,:,:,:,0] = dat_tg
+            x[i,:,:,:,0] = dat_in
+
+            i_transform += 1
+            if i_transform == self.len_each:
+                i_transform = 0
+                i_file += 1
+
         return x, y
 
