@@ -29,8 +29,14 @@ def separate_lr(dat_bin, aff, verbose=True):
     labels = measure.label(dat_bin, connectivity=3)
 
     if labels.max() == 1:
-        sys.stderr.write("only one connected region found\n")
-        return dat_bin, dat_bin
+        sys.stderr.write("only one connected region found. removing center slice and splitting l/r\n")
+        center = dat_bin.shape[0] // 2
+        if dat_bin.shape[0] % 2 == 0:
+            if dat_bin[center,...].sum() > dat_bin[center-1,...].sum():
+                center -= 1
+        labels[center,...] = 0
+        labels[center:,...] *= 2
+
     elif labels.max() > 2:
         if verbose:
             txt = "# There are {num_labels} labels\n".format(num_labels=labels.max())
